@@ -1,0 +1,1038 @@
+
+html_content = '''<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎨 나의 여가 활동 - 학습 게임</title>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #1565C0;
+  --primary-light: #42A5F5;
+  --success: #2E7D32;
+  --success-light: #66BB6A;
+  --warning: #F57F17;
+  --bg: #FFFDE7;
+  --card-bg: #FFFFFF;
+  --text: #212121;
+  --text-light: #FFFFFF;
+  --shadow: 0 4px 12px rgba(0,0,0,0.15);
+  --radius: 20px;
+  --touch-min: 64px;
+}
+
+html { font-size: 18px; }
+
+body {
+  font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: var(--text-light);
+  padding: 16px 20px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  position: relative;
+  z-index: 10;
+}
+.app-header h1 { font-size: 1.6rem; margin-bottom: 4px; }
+.app-header .subtitle { font-size: 0.95rem; opacity: 0.9; }
+
+/* ===== PROGRESS BAR ===== */
+.progress-wrap {
+  background: rgba(255,255,255,0.3);
+  border-radius: 12px;
+  height: 14px;
+  margin: 10px auto 0;
+  max-width: 400px;
+  overflow: hidden;
+}
+.progress-bar {
+  background: #FFD54F;
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.6s ease;
+  width: 0%;
+}
+
+/* ===== CHARACTER GUIDE ===== */
+.guide-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 20px auto;
+  max-width: 600px;
+  padding: 0 16px;
+}
+.character {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  background: #FFF3E0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  border: 4px solid #FF9800;
+  box-shadow: var(--shadow);
+  animation: charBounce 2s ease-in-out infinite;
+}
+@keyframes charBounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.speech-bubble {
+  background: var(--card-bg);
+  border: 3px solid #FF9800;
+  border-radius: 20px;
+  padding: 16px 20px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.6;
+  position: relative;
+  box-shadow: var(--shadow);
+  flex: 1;
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 20px;
+  border: 8px solid transparent;
+  border-right-color: #FF9800;
+}
+
+/* ===== SCREENS ===== */
+.screen { display: none; max-width: 700px; margin: 0 auto; padding: 16px; }
+.screen.active { display: block; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  padding: 14px 28px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.95); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: var(--text-light);
+}
+.btn-success {
+  background: linear-gradient(135deg, var(--success), var(--success-light));
+  color: var(--text-light);
+}
+.btn-warning {
+  background: linear-gradient(135deg, #F57F17, #FFB300);
+  color: var(--text);
+}
+
+/* ===== ACTIVITY CARDS ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 20px 0;
+}
+.activity-card {
+  background: var(--card-bg);
+  border: 4px solid #E0E0E0;
+  border-radius: var(--radius);
+  padding: 20px 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.activity-card:active { transform: scale(0.95); }
+.activity-card .emoji { font-size: 3rem; }
+.activity-card .label { font-size: 1.2rem; font-weight: 700; }
+.activity-card.selected {
+  border-color: var(--primary);
+  background: #E3F2FD;
+  box-shadow: 0 0 0 4px rgba(21,101,192,0.3);
+}
+.activity-card.correct {
+  border-color: var(--success) !important;
+  background: #E8F5E9 !important;
+  animation: correctPulse 0.6s ease;
+}
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.08); }
+  60% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+.activity-card.try-again {
+  animation: gentleShake 0.5s ease;
+}
+@keyframes gentleShake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ===== FEEDBACK OVERLAY ===== */
+.feedback-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.feedback-overlay.show { display: flex; }
+.feedback-box {
+  background: var(--card-bg);
+  border-radius: 30px;
+  padding: 40px 36px;
+  text-align: center;
+  max-width: 360px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  animation: popIn 0.4s ease;
+}
+@keyframes popIn {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.feedback-box .fb-emoji { font-size: 4.5rem; }
+.feedback-box .fb-text { font-size: 1.5rem; font-weight: 800; margin: 12px 0 20px; color: var(--success); }
+
+/* ===== CELEBRATION ===== */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  overflow: hidden;
+}
+.confetti {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ===== STAR REWARDS ===== */
+.stars-display {
+  text-align: center;
+  margin: 12px 0;
+  font-size: 2.2rem;
+  letter-spacing: 6px;
+}
+.star { display: inline-block; transition: transform 0.3s; }
+.star.earned { animation: starPop 0.5s ease; }
+@keyframes starPop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+/* ===== IMAGE DISPLAY ===== */
+.activity-image-area {
+  text-align: center;
+  margin: 16px 0;
+}
+.activity-image-area .big-emoji {
+  font-size: 6rem;
+  display: block;
+  margin: 0 auto;
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+@keyframes gentleFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ===== INTRO CARDS ===== */
+.intro-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+.intro-item {
+  background: var(--card-bg);
+  border: 3px solid #E0E0E0;
+  border-radius: 16px;
+  padding: 12px 6px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.intro-item .emoji { font-size: 2rem; }
+.intro-item .label { font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
+
+/* ===== TEACHER PANEL ===== */
+.teacher-toggle {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 50;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #7B1FA2;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.teacher-panel {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  right: 16px;
+  width: 340px;
+  max-height: 70vh;
+  background: var(--card-bg);
+  border: 3px solid #7B1FA2;
+  border-radius: var(--radius);
+  padding: 20px;
+  z-index: 50;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+.teacher-panel.show { display: block; }
+.teacher-panel h3 { color: #7B1FA2; margin-bottom: 12px; font-size: 1.1rem; }
+.teacher-panel table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.teacher-panel th, .teacher-panel td {
+  border: 1px solid #E0E0E0;
+  padding: 6px 8px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+.teacher-panel th { background: #F3E5F5; font-weight: 700; }
+.teacher-panel .export-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: #7B1FA2;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== TTS BUTTON ===== */
+.tts-btn {
+  background: none;
+  border: 2px solid #FF9800;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== SUMMARY ===== */
+.summary-list {
+  list-style: none;
+  margin: 16px 0;
+}
+.summary-list li {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== CHOICE ROW ===== */
+.choice-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 500px) {
+  html { font-size: 16px; }
+  .intro-grid { grid-template-columns: repeat(2, 1fr); }
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+  .teacher-panel { width: calc(100% - 32px); right: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="app-header">
+  <h1>🎨 나의 여가 활동</h1>
+  <p class="subtitle">즐거운 여가 활동을 배워요!</p>
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</header>
+
+<!-- ===== STARS ===== -->
+<div class="stars-display" id="starsDisplay">
+  <span class="star" id="star1">☆</span>
+  <span class="star" id="star2">☆</span>
+  <span class="star" id="star3">☆</span>
+  <span class="star" id="star4">☆</span>
+  <span class="star" id="star5">☆</span>
+</div>
+
+<!-- =========================================
+     SCREEN 0: INTRO / 도입
+     ========================================= -->
+<div class="screen active" id="screen0">
+  <div class="guide-area">
+    <div class="character">🐶</div>
+    <div class="speech-bubble" id="intro-speech">
+      👋 안녕! 나는 <strong>뭉이</strong>야!<br>
+      오늘은 <strong>여가 활동</strong>을 배워요! 🎉
+    </div>
+  </div>
+
+  <div class="activity-image-area">
+    <span class="big-emoji">🎈</span>
+  </div>
+
+  <p style="text-align:center; font-size:1.1rem; font-weight:600; margin:10px 0;">
+    📌 오늘의 목표
+  </p>
+  <div style="background:#E3F2FD; border-radius:16px; padding:16px 20px; text-align:center; font-size:1.15rem; font-weight:700; border:3px solid var(--primary);">
+    🎯 여가 활동을 알고<br>좋아하는 것을 골라요!
+  </div>
+
+  <p style="text-align:center; font-size:1rem; font-weight:600; margin:16px 0 8px;">
+    🌟 여가 활동이 뭘까요?
+  </p>
+  <div class="intro-grid">
+    <div class="intro-item"><div class="emoji">🎵</div><div class="label">음악</div></div>
+    <div class="intro-item"><div class="emoji">🎨</div><div class="label">그림</div></div>
+    <div class="intro-item"><div class="emoji">🚶</div><div class="label">산책</div></div>
+    <div class="intro-item"><div class="emoji">🍳</div><div class="label">요리</div></div>
+    <div class="intro-item"><div class="emoji">⚽</div><div class="label">운동</div></div>
+    <div class="intro-item"><div class="emoji">🎬</div><div class="label">영화</div></div>
+    <div class="intro-item"><div class="emoji">📖</div><div class="label">독서</div></div>
+    <div class="intro-item"><div class="emoji">🎮</div><div class="label">게임</div></div>
+  </div>
+
+  <div style="text-align:center; margin-top:20px;">
+    <button class="btn btn-primary" onclick="goToScreen(1)">
+      👉 시작하기
+    </button>
+  </div>
+</div>
+
+<!-- =========================================
+     SCREEN 1: STEP 1 — 이름 듣고 고르기 (I Do → We Do)
+     ========================================= -->
+<div class="screen" id="screen1">
+  <div class="guide-area">
+    <div class="character">🐶</div>
+    <div class="speech-bubble" id="step1-speech">
+      🔊 뭉이가 말하는<br><strong>여가 활동</strong>을 골라봐요!
+    </div>
+  </div>
+
+  <div class="activity-image-area">
+    <span class="big-emoji" id="step1-target-emoji"></span>
+    <p style="font-size:1.5rem; font-weight:800; margin-top:8px;" id="step1-target-text"></p>
+  </div>
+
+  <p style="text-align:center; font-size:1.1rem; font-weight:600;">👇 맞는 것을 눌러요!</p>
+
+  <div class="card-grid" id="step1-choices"></div>
+
+  <div style="text-align:center; margin-top:12px;">
+    <button class="tts-btn" onclick="speakStep1Question()" aria-label="다시 듣기">🔊</button>
+    <span style="font-size:0.85rem; margin-left:6px;">다시 듣기</span>
+  </div>
+</div>
+
+<!-- =========================================
+     SCREEN 2: STEP 2 — 그림 보고 이름 고르기 (You Do)
+     ========================================= -->
+<div class="screen" id="screen2">
+  <div class="guide-area">
+    <div class="character">🐶</div>
+    <div class="speech-bubble" id="step2-speech">
+      👀 그림을 보고<br><strong>이름</strong>을 골라봐요!
+    </div>
+  </div>
+
+  <div class="activity-image-area">
+    <span class="big-emoji" id="step2-emoji"></span>
+  </div>
+
+  <p style="text-align:center; font-size:1.1rem; font-weight:600;">👇 이 활동의 이름은?</p>
+
+  <div class="card-grid" id="step2-choices"></div>
+
+  <div style="text-align:center; margin-top:12px;">
+    <button class="tts-btn" onclick="speakStep2Question()" aria-label="다시 듣기">🔊</button>
+    <span style="font-size:0.85rem; margin-left:6px;">다시 듣기</span>
+  </div>
+</div>
+
+<!-- =========================================
+     SCREEN 3: STEP 3 — 좋아하는 활동 고르기
+     ========================================= -->
+<div class="screen" id="screen3">
+  <div class="guide-area">
+    <div class="character">🐶</div>
+    <div class="speech-bubble" id="step3-speech">
+      💖 내가 좋아하는<br><strong>여가 활동</strong>을 골라요!
+    </div>
+  </div>
+
+  <p style="text-align:center; font-size:1.15rem; font-weight:700; margin:12px 0;">
+    ❤️ 좋아하는 것을 <strong>2개</strong> 골라요!
+  </p>
+
+  <div class="card-grid" id="step3-choices"></div>
+
+  <div style="text-align:center; margin-top:16px;">
+    <button class="btn btn-success" id="step3-confirm" onclick="confirmFavorites()" style="display:none;">
+      ✅ 선택 완료!
+    </button>
+  </div>
+</div>
+
+<!-- =========================================
+     SCREEN 4: SUMMARY / 정리
+     ========================================= -->
+<div class="screen" id="screen4">
+  <div class="guide-area">
+    <div class="character">🐶</div>
+    <div class="speech-bubble" id="summary-speech">
+      🎉 정말 잘했어요!<br>오늘 배운 것을 봐요!
+    </div>
+  </div>
+
+  <div style="text-align:center; margin:10px 0;">
+    <span style="font-size:4rem;">🏆</span>
+    <p style="font-size:1.4rem; font-weight:800; color:var(--success);">대단해요!</p>
+  </div>
+
+  <p style="font-size:1.1rem; font-weight:700; margin:12px 0;">📚 오늘 배운 3가지:</p>
+  <ul class="summary-list">
+    <li>1️⃣ 여가 활동의 이름을 알았어요!</li>
+    <li>2️⃣ 그림을 보고 이름을 찾았어요!</li>
+    <li>3️⃣ 좋아하는 활동을 골랐어요!</li>
+  </ul>
+
+  <div id="myFavorites" style="background:#FFF3E0; border-radius:16px; padding:16px; text-align:center; border:3px solid #FF9800; margin:12px 0;"></div>
+
+  <p style="text-align:center; font-size:1rem; font-weight:600; margin:14px 0;">
+    📢 다음 시간에는<br><strong>여가 활동을 해봐요!</strong> 🎊
+  </p>
+
+  <div style="text-align:center; margin-top:16px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+    <button class="btn btn-primary" onclick="resetGame()">🔄 다시 하기</button>
+    <button class="btn btn-warning" onclick="speakSummary()">🔊 다시 듣기</button>
+  </div>
+</div>
+
+<!-- ===== FEEDBACK OVERLAY ===== -->
+<div class="feedback-overlay" id="feedbackOverlay">
+  <div class="feedback-box">
+    <div class="fb-emoji" id="fbEmoji">⭐</div>
+    <div class="fb-text" id="fbText">잘했어요!</div>
+    <button class="btn btn-success" id="fbBtn" onclick="closeFeedback()">👍 계속하기</button>
+  </div>
+</div>
+
+<!-- ===== CONFETTI CONTAINER ===== -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<!-- ===== TEACHER PANEL ===== -->
+<button class="teacher-toggle" onclick="toggleTeacher()" aria-label="교사 기록 보기">📋</button>
+<div class="teacher-panel" id="teacherPanel">
+  <h3>📋 교사 관찰 기록</h3>
+  <p><strong>학생명:</strong> <input type="text" id="studentName" placeholder="이름 입력" style="border:1px solid #ccc; border-radius:8px; padding:4px 8px; width:120px;"></p>
+  <p><strong>수업일:</strong> <span id="todayDate"></span></p>
+  <p style="margin-top:8px;"><strong>📊 단계별 결과:</strong></p>
+  <table>
+    <thead>
+      <tr><th>단계</th><th>문항</th><th>시도</th><th>결과</th><th>촉진</th></tr>
+    </thead>
+    <tbody id="recordBody"></tbody>
+  </table>
+  <p style="margin-top:10px;"><strong>⏱ 총 소요시간:</strong> <span id="totalTime">-</span></p>
+  <p><strong>⭐ 획득 별:</strong> <span id="totalStars">0</span> / 5</p>
+  <p><strong>💖 선호 활동:</strong> <span id="favRecord">-</span></p>
+  <p style="margin-top:8px;"><strong>📝 메모:</strong></p>
+  <textarea id="teacherMemo" rows="3" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:6px; font-size:0.85rem;" placeholder="관찰 내용 메모..."></textarea>
+  <button class="export-btn" onclick="exportRecord()">📥 기록 저장 (텍스트)</button>
+</div>
+
+<script>
+// ===== CORE DATA =====
+const ACTIVITIES = [
+  { name: '음악', emoji: '🎵', desc: '노래를 들어요' },
+  { name: '그림', emoji: '🎨', desc: '그림을 그려요' },
+  { name: '산책', emoji: '🚶', desc: '밖을 걸어요' },
+  { name: '요리', emoji: '🍳', desc: '음식을 만들어요' },
+  { name: '운동', emoji: '⚽', desc: '몸을 움직여요' },
+  { name: '영화', emoji: '🎬', desc: '영화를 봐요' },
+  { name: '독서', emoji: '📖', desc: '책을 읽어요' },
+  { name: '게임', emoji: '🎮', desc: '게임을 해요' }
+];
+
+const PRAISE = [
+  '잘했어요! ⭐', '멋져요! 🌟', '최고예요! 🏆',
+  '대단해요! 👏', '훌륭해요! 💖', '짝짝짝! 🎉'
+];
+
+const RETRY_MSG = [
+  '다시 해봐요! 💪', '천천히 해봐요! 😊',
+  '한 번 더! 👍', '괜찮아요, 다시! 🌈'
+];
+
+// ===== STATE =====
+let currentScreen = 0;
+let starsEarned = 0;
+let gameStartTime = Date.now();
+let records = [];
+let favorites = [];
+
+// Step 1 state
+let step1Questions = [];
+let step1Index = 0;
+
+// Step 2 state
+let step2Questions = [];
+let step2Index = 0;
+
+// ===== TTS =====
+function speak(text, callback) {
+  if (!('speechSynthesis' in window)) { if(callback) callback(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 0.8;
+  u.pitch = 1.1;
+  // Try to find Korean voice
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) u.voice = koVoice;
+  if (callback) u.onend = callback;
+  window.speechSynthesis.speak(u);
+}
+
+// Ensure voices loaded
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+// ===== NAVIGATION =====
+function goToScreen(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen' + n).classList.add('active');
+  currentScreen = n;
+  updateProgress();
+
+  switch(n) {
+    case 0: speak('안녕! 나는 뭉이야! 오늘은 여가 활동을 배워요!'); break;
+    case 1: initStep1(); break;
+    case 2: initStep2(); break;
+    case 3: initStep3(); break;
+    case 4: showSummary(); break;
+  }
+}
+
+function updateProgress() {
+  const pct = [0, 25, 55, 80, 100][currentScreen];
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ===== HELPERS =====
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pick(arr, n) { return shuffle(arr).slice(0, n); }
+
+function randomPraise() { return PRAISE[Math.floor(Math.random() * PRAISE.length)]; }
+function randomRetry() { return RETRY_MSG[Math.floor(Math.random() * RETRY_MSG.length)]; }
+
+// ===== STARS =====
+function earnStar() {
+  if (starsEarned >= 5) return;
+  starsEarned++;
+  const starEl = document.getElementById('star' + starsEarned);
+  starEl.textContent = '⭐';
+  starEl.classList.add('earned');
+  document.getElementById('totalStars').textContent = starsEarned;
+}
+
+// ===== FEEDBACK =====
+let feedbackCallback = null;
+
+function showFeedback(emoji, text, cb) {
+  document.getElementById('fbEmoji').textContent = emoji;
+  document.getElementById('fbText').textContent = text;
+  document.getElementById('feedbackOverlay').classList.add('show');
+  feedbackCallback = cb;
+  speak(text);
+}
+
+function closeFeedback() {
+  document.getElementById('feedbackOverlay').classList.remove('show');
+  if (feedbackCallback) feedbackCallback();
+  feedbackCallback = null;
+}
+
+// ===== CELEBRATION =====
+function celebrate() {
+  const container = document.getElementById('confettiContainer');
+  container.innerHTML = '';
+  const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#FF9800','#66BB6A'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + '%';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    c.style.animationDelay = (Math.random() * 0.8) + 's';
+    c.style.width = (8 + Math.random() * 10) + 'px';
+    c.style.height = (8 + Math.random() * 10) + 'px';
+    container.appendChild(c);
+  }
+  setTimeout(() => container.innerHTML = '', 4000);
+}
+
+// ===== RECORDS =====
+function addRecord(step, question, attempts, result, prompt) {
+  records.push({ step, question, attempts, result, prompt });
+  const tbody = document.getElementById('recordBody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${step}</td><td>${question}</td><td>${attempts}</td><td>${result}</td><td>${prompt}</td>`;
+  tbody.appendChild(tr);
+}
+
+// ================================================
+// STEP 1: 이름을 듣고 맞는 그림 고르기
+// ================================================
+function initStep1() {
+  step1Questions = pick(ACTIVITIES, 3);
+  step1Index = 0;
+  showStep1Question();
+}
+
+function showStep1Question() {
+  if (step1Index >= step1Questions.length) {
+    earnStar();
+    celebrate();
+    showFeedback('🌟', '1단계 완료! 멋져요!', () => goToScreen(2));
+    return;
+  }
+
+  const q = step1Questions[step1Index];
+  document.getElementById('step1-target-emoji').textContent = '';
+  document.getElementById('step1-target-text').textContent = '🔊 "' + q.name + '" 을 찾아요!';
+
+  // choices: correct + 3 distractors
+  let others = ACTIVITIES.filter(a => a.name !== q.name);
+  let choices = shuffle([q, ...pick(others, 3)]);
+
+  const grid = document.getElementById('step1-choices');
+  grid.innerHTML = '';
+  let attempts = 0;
+
+  choices.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'activity-card';
+    card.innerHTML = `<span class="emoji">${c.emoji}</span><span class="label">${c.name}</span>`;
+    card.onclick = () => {
+      attempts++;
+      if (c.name === q.name) {
+        card.classList.add('correct');
+        const praise = randomPraise();
+        earnStar();
+        celebrate();
+        addRecord('1단계', q.name, attempts, '성공', attempts > 1 ? '재시도' : '독립');
+        speak(praise, () => {
+          setTimeout(() => {
+            step1Index++;
+            showStep1Question();
+          }, 600);
+        });
+        // disable all
+        grid.querySelectorAll('.activity-card').forEach(c2 => c2.onclick = null);
+      } else {
+        card.classList.add('try-again');
+        setTimeout(() => card.classList.remove('try-again'), 500);
+        speak(randomRetry());
+      }
+    };
+    grid.appendChild(card);
+  });
+
+  speakStep1Question();
+}
+
+function speakStep1Question() {
+  if (step1Index < step1Questions.length) {
+    const q = step1Questions[step1Index];
+    speak(q.name + '을 찾아봐요!');
+  }
+}
+
+// ================================================
+// STEP 2: 그림을 보고 이름 고르기
+// ================================================
+function initStep2() {
+  step2Questions = pick(ACTIVITIES, 3);
+  step2Index = 0;
+  showStep2Question();
+}
+
+function showStep2Question() {
+  if (step2Index >= step2Questions.length) {
+    earnStar();
+    celebrate();
+    showFeedback('🌟', '2단계 완료! 대단해요!', () => goToScreen(3));
+    return;
+  }
+
+  const q = step2Questions[step2Index];
+  document.getElementById('step2-emoji').textContent = q.emoji;
+
+  let others = ACTIVITIES.filter(a => a.name !== q.name);
+  let choices = shuffle([q, ...pick(others, 3)]);
+
+  const grid = document.getElementById('step2-choices');
+  grid.innerHTML = '';
+  let attempts = 0;
+
+  choices.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'activity-card';
+    card.innerHTML = `<span class="emoji" style="font-size:1.8rem;">${c.emoji}</span><span class="label">${c.name}</span>`;
+    card.onclick = () => {
+      attempts++;
+      if (c.name === q.name) {
+        card.classList.add('correct');
+        const praise = randomPraise();
+        earnStar();
+        celebrate();
+        addRecord('2단계', q.name, attempts, '성공', attempts > 1 ? '재시도' : '독립');
+        speak(praise, () => {
+          setTimeout(() => {
+            step2Index++;
+            showStep2Question();
+          }, 600);
+        });
+        grid.querySelectorAll('.activity-card').forEach(c2 => c2.onclick = null);
+      } else {
+        card.classList.add('try-again');
+        setTimeout(() => card.classList.remove('try-again'), 500);
+        speak(randomRetry());
+      }
+    };
+    grid.appendChild(card);
+  });
+
+  speakStep2Question();
+}
+
+function speakStep2Question() {
+  if (step2Index < step2Questions.length) {
+    speak('이 그림의 이름은 뭘까요?');
+  }
+}
+
+// ================================================
+// STEP 3: 좋아하는 활동 고르기
+// ================================================
+function initStep3() {
+  favorites = [];
+  document.getElementById('step3-confirm').style.display = 'none';
+  const grid = document.getElementById('step3-choices');
+  grid.innerHTML = '';
+
+  ACTIVITIES.forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'activity-card';
+    card.dataset.name = a.name;
+    card.innerHTML = `<span class="emoji">${a.emoji}</span><span class="label">${a.name}</span>`;
+    card.onclick = () => toggleFavorite(card, a);
+    grid.appendChild(card);
+  });
+
+  speak('좋아하는 여가 활동을 2개 골라봐요!');
+}
+
+function toggleFavorite(card, activity) {
+  if (card.classList.contains('selected')) {
+    card.classList.remove('selected');
+    favorites = favorites.filter(f => f.name !== activity.name);
+  } else {
+    if (favorites.length >= 2) {
+      speak('2개만 골라요!');
+      return;
+    }
+    card.classList.add('selected');
+    favorites.push(activity);
+  }
+
+  if (favorites.length === 2) {
+    document.getElementById('step3-confirm').style.display = 'inline-flex';
+  } else {
+    document.getElementById('step3-confirm').style.display = 'none';
+  }
+}
+
+function confirmFavorites() {
+  earnStar();
+  celebrate();
+  addRecord('3단계', favorites.map(f=>f.name).join(', '), 1, '성공', '독립');
+  document.getElementById('favRecord').textContent = favorites.map(f => f.emoji + f.name).join(', ');
+  showFeedback('💖', '멋진 선택이에요!', () => goToScreen(4));
+}
+
+// ================================================
+// SUMMARY
+// ================================================
+function showSummary() {
+  const favDiv = document.getElementById('myFavorites');
+  if (favorites.length > 0) {
+    favDiv.innerHTML = '<p style="font-weight:700; margin-bottom:8px;">💖 내가 좋아하는 활동</p>' +
+      favorites.map(f => `<span style="font-size:2.5rem; margin:0 10px;">${f.emoji}</span><br><strong>${f.name}</strong>`).join('<span style="margin:0 8px; font-size:1.5rem;">❤️</span>');
+  }
+
+  // calc time
+  const elapsed = Math.round((Date.now() - gameStartTime) / 1000);
+  const min = Math.floor(elapsed / 60);
+  const sec = elapsed % 60;
+  document.getElementById('totalTime').textContent = `${min}분 ${sec}초`;
+
+  celebrate();
+  speakSummary();
+}
+
+function speakSummary() {
+  speak('정말 잘했어요! 오늘 여가 활동의 이름을 알고, 좋아하는 활동을 골랐어요! 대단해요!');
+}
+
+// ===== RESET =====
+function resetGame() {
+  starsEarned = 0;
+  records = [];
+  favorites = [];
+  gameStartTime = Date.now();
+  document.getElementById('recordBody').innerHTML = '';
+  document.getElementById('totalStars').textContent = '0';
+  document.getElementById('favRecord').textContent = '-';
+  document.getElementById('totalTime').textContent = '-';
+  for (let i = 1; i <= 5; i++) {
+    const s = document.getElementById('star' + i);
+    s.textContent = '☆';
+    s.classList.remove('earned');
+  }
+  goToScreen(0);
+}
+
+// ===== TEACHER PANEL =====
+function toggleTeacher() {
+  document.getElementById('teacherPanel').classList.toggle('show');
+}
+
+function exportRecord() {
+  const name = document.getElementById('studentName').value || '(미입력)';
+  const date = document.getElementById('todayDate').textContent;
+  const time = document.getElementById('totalTime').textContent;
+  const stars = document.getElementById('totalStars').textContent;
+  const fav = document.getElementById('favRecord').textContent;
+  const memo = document.getElementById('teacherMemo').value;
+
+  let text = `===== 학습 관찰 기록 =====\\n`;
+  text += `학생명: ${name}\\n수업일: ${date}\\n`;
+  text += `수업명: 나의 여가 활동\\n`;
+  text += `총 소요시간: ${time}\\n획득 별: ${stars}/5\\n선호 활동: ${fav}\\n\\n`;
+  text += `--- 단계별 기록 ---\\n`;
+  records.forEach((r, i) => {
+    text += `${i+1}. [${r.step}] ${r.question} | 시도:${r.attempts} | ${r.result} | 촉진:${r.prompt}\\n`;
+  });
+  text += `\\n교사 메모: ${memo}\\n`;
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `여가활동_기록_${name}_${date}.txt`;
+  a.click();
+}
+
+// ===== INIT =====
+document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ko-KR');
+
+// Initial TTS after small delay
+setTimeout(() => {
+  speak('안녕! 나는 뭉이야! 오늘은 여가 활동을 배워요!');
+}, 800);
+
+updateProgress();
+</script>
+
+</body>
+</html>'''
+
+with open('/home/user/leisure_activity_game.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print("✅ HTML 파일이 생성되었습니다!")
+print(f"📄 파일 크기: {len(html_content):,} bytes")
+print(f"📄 총 라인 수: {html_content.count(chr(10)):,} lines")
